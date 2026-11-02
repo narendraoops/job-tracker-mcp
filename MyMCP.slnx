@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="JobTrackerMcp.Tests/JobTrackerMcp.Tests.csproj" />
+  <Project Path="JobTrackerMcp/JobTrackerMcp.csproj" />
+</Solution>
