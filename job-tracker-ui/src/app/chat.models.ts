@@ -8,3 +8,10 @@ export interface ChatReply {
   answer: string;
   toolCalls: string[];
 }
+
+// One question and its answer, kept on the page as the conversation grows.
+export interface ChatEntry {
+  question: string;
+  answer: string;
+  toolCalls: string[];
+}
