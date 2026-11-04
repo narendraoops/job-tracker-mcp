@@ -25,7 +25,7 @@ namespace JobTrackerApi.Controllers
 
             try
             {
-                ChatReply reply = await _chatService.AskAsync(request.Question);
+                ChatReply reply = await _chatService.AskAsync(request.Question, request.History);
                 return Ok(reply);
             }
             catch (Exception ex)

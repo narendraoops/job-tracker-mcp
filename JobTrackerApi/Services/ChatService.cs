@@ -10,6 +10,9 @@ namespace JobTrackerApi.Services
     {
         private const int MaxToolSteps = 5;
 
+        // Only the most recent turns are sent to the model, to keep each request small.
+        private const int MaxHistoryTurns = 10;
+
         private readonly McpClient _mcpClient;
         private readonly IChatClient _chatClient;
         private readonly ChatOptions _chatOptions;
@@ -58,11 +61,24 @@ namespace JobTrackerApi.Services
             return new ChatService(mcpClient, chatClient, chatOptions);
         }
 
-        public async Task<ChatReply> AskAsync(string question)
+        public async Task<ChatReply> AskAsync(string question, List<ChatTurn>? history)
         {
-            // Each question is answered on its own, with no memory of earlier ones.
             List<ChatMessage> messages = new List<ChatMessage>();
             messages.Add(new ChatMessage(ChatRole.System, BuildSystemPrompt()));
+
+            // The browser sends the conversation so far. Replay the latest turns,
+            // so the model can understand follow-ups such as "which of those?".
+            if (history != null)
+            {
+                int skip = Math.Max(0, history.Count - MaxHistoryTurns);
+
+                foreach (ChatTurn turn in history.Skip(skip))
+                {
+                    messages.Add(new ChatMessage(ChatRole.User, turn.Question));
+                    messages.Add(new ChatMessage(ChatRole.Assistant, turn.Answer));
+                }
+            }
+
             messages.Add(new ChatMessage(ChatRole.User, question));
 
             ChatResponse response = await _chatClient.GetResponseAsync(messages, _chatOptions);
